@@ -5,6 +5,8 @@ import jakarta.persistence.*;
 import java.time.Instant;
 import java.util.UUID;
 
+@Entity
+@Table(name = "incidents")
 public class Incident {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
