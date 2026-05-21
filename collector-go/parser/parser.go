@@ -1,6 +1,9 @@
 package parser
 
-import "strings"
+import (
+	"strings"
+	"unicode"
+)
 
 type LogEvent struct {
 	Level   string
@@ -8,13 +11,14 @@ type LogEvent struct {
 }
 
 func ParseLine(line string) (LogEvent, bool) {
-	parts := strings.SplitN(line, " ", 2)
-	if len(parts) < 2 {
+	idx := strings.IndexFunc(line, unicode.IsSpace)
+	if idx < 0 {
 		return LogEvent{}, false
 	}
-	level := strings.ToUpper(parts[0])
+	level := strings.ToUpper(line[:idx])
 	if level != "ERROR" && level != "WARN" {
 		return LogEvent{}, false
 	}
-	return LogEvent{Level: level, Message: parts[1]}, true
+	message := strings.TrimLeftFunc(line[idx:], unicode.IsSpace)
+	return LogEvent{Level: level, Message: message}, true
 }

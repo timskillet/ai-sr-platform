@@ -67,4 +67,20 @@ func TestParseLine_LowercaseWarn(t *testing.T) {
 	if event.Level != "WARN" {
 		t.Errorf("Level = %q, want WARN", event.Level)
 	}
+	if event.Message != "disk usage high" {
+		t.Errorf("Message = %q, want %q", event.Message, "disk usage high")
+	}
+}
+
+func TestParseLine_TabSeparated(t *testing.T) {
+	event, ok := parser.ParseLine("ERROR\tdatabase connection timeout")
+	if !ok {
+		t.Fatal("expected ok=true for tab-separated ERROR line")
+	}
+	if event.Level != "ERROR" {
+		t.Errorf("Level = %q, want ERROR", event.Level)
+	}
+	if event.Message != "database connection timeout" {
+		t.Errorf("Message = %q, want %q", event.Message, "database connection timeout")
+	}
 }

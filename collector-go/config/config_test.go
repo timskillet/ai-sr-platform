@@ -1,15 +1,14 @@
 package config_test
 
 import (
-	"os"
 	"testing"
 
 	"github.com/timskillet/ai-reliability-platform/collector-go/config"
 )
 
 func TestLoad_MissingLogFile(t *testing.T) {
-	os.Unsetenv("LOG_FILE")
-	os.Unsetenv("SERVICE_NAME")
+	t.Setenv("LOG_FILE", "")
+	t.Setenv("SERVICE_NAME", "")
 	_, err := config.Load()
 	if err == nil {
 		t.Fatal("expected error when LOG_FILE is missing")
@@ -17,9 +16,8 @@ func TestLoad_MissingLogFile(t *testing.T) {
 }
 
 func TestLoad_MissingServiceName(t *testing.T) {
-	os.Setenv("LOG_FILE", "/tmp/app.log")
-	os.Unsetenv("SERVICE_NAME")
-	defer os.Unsetenv("LOG_FILE")
+	t.Setenv("LOG_FILE", "/tmp/app.log")
+	t.Setenv("SERVICE_NAME", "")
 
 	_, err := config.Load()
 	if err == nil {
@@ -28,11 +26,9 @@ func TestLoad_MissingServiceName(t *testing.T) {
 }
 
 func TestLoad_DefaultsBackendURL(t *testing.T) {
-	os.Setenv("LOG_FILE", "tmp/app.log")
-	os.Setenv("SERVICE_NAME", "test-svc")
-	os.Unsetenv("BACKEND_URL")
-	defer os.Unsetenv("LOG_FILE")
-	defer os.Unsetenv("SERVICE_NAME")
+	t.Setenv("LOG_FILE", "/tmp/app.log")
+	t.Setenv("SERVICE_NAME", "test-svc")
+	t.Setenv("BACKEND_URL", "")
 
 	cfg, err := config.Load()
 	if err != nil {
@@ -44,12 +40,9 @@ func TestLoad_DefaultsBackendURL(t *testing.T) {
 }
 
 func TestLoad_ReadsAllVars(t *testing.T) {
-	os.Setenv("LOG_FILE", "/var/log/app.log")
-	os.Setenv("SERVICE_NAME", "payments-api")
-	os.Setenv("BACKEND_URL", "http://backend:9090")
-	defer os.Unsetenv("LOG_FILE")
-	defer os.Unsetenv("SERVICE_NAME")
-	defer os.Unsetenv("BACKEND_URL")
+	t.Setenv("LOG_FILE", "/var/log/app.log")
+	t.Setenv("SERVICE_NAME", "payments-api")
+	t.Setenv("BACKEND_URL", "http://backend:9090")
 
 	cfg, err := config.Load()
 	if err != nil {
@@ -63,5 +56,25 @@ func TestLoad_ReadsAllVars(t *testing.T) {
 	}
 	if cfg.BackendURL != "http://backend:9090" {
 		t.Errorf("BackendURL = %q", cfg.BackendURL)
+	}
+}
+
+func TestLoad_WhitespaceOnlyLogFileRejected(t *testing.T) {
+	t.Setenv("LOG_FILE", "   ")
+	t.Setenv("SERVICE_NAME", "test-svc")
+
+	_, err := config.Load()
+	if err == nil {
+		t.Fatal("expected error for whitespace-only LOG_FILE")
+	}
+}
+
+func TestLoad_WhitespaceOnlyServiceNameRejected(t *testing.T) {
+	t.Setenv("LOG_FILE", "/tmp/app.log")
+	t.Setenv("SERVICE_NAME", "   ")
+
+	_, err := config.Load()
+	if err == nil {
+		t.Fatal("expected error for whitespace-only SERVICE_NAME")
 	}
 }

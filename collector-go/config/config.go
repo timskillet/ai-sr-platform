@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"os"
+	"strings"
 )
 
 type Config struct {
@@ -12,15 +13,15 @@ type Config struct {
 }
 
 func Load() (Config, error) {
-	logFile := os.Getenv("LOG_FILE")
+	logFile := strings.TrimSpace(os.Getenv("LOG_FILE"))
 	if logFile == "" {
 		return Config{}, fmt.Errorf("LOG_FILE environment variable is required")
 	}
-	serviceName := os.Getenv("SERVICE_NAME")
+	serviceName := strings.TrimSpace(os.Getenv("SERVICE_NAME"))
 	if serviceName == "" {
 		return Config{}, fmt.Errorf("SERVICE_NAME environment variable is required")
 	}
-	backendURL := os.Getenv("BACKEND_URL")
+	backendURL := strings.TrimSpace(os.Getenv("BACKEND_URL"))
 	if backendURL == "" {
 		backendURL = "http://localhost:8080"
 	}
