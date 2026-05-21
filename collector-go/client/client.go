@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"time"
 )
 
 type Incident struct {
@@ -21,7 +22,9 @@ type IncidentClient struct {
 func New(backendURL string) *IncidentClient {
 	return &IncidentClient{
 		backendURL: backendURL,
-		httpClient: &http.Client{},
+		httpClient: &http.Client{
+			Timeout: 10 * time.Second,
+		},
 	}
 }
 
